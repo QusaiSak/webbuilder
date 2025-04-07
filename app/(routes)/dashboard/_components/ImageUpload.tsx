@@ -13,12 +13,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { supabase } from '@/configs/supabase'
 import axios from 'axios'
 import { useAuthContext } from '@/app/provider'
 import { useRouter } from 'next/navigation'
 import Constants from '@/data/Constants'
 import { toast } from 'sonner'
+import supabase from '@/configs/supabase'
 function ImageUpload() {
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -48,19 +48,28 @@ function ImageUpload() {
         
         // Save Image to Supabase Storage
         const fileName = Date.now() + '.png';
-        const { data, error } = await supabase.storage
-            .from('wireframe-to-code')
-            .upload(`public/${fileName}`, file);
+        const filePath = `public/${fileName}`;
+
+        // ---- DEBUGGING LOG ----
+        console.log('Uploading to:', filePath);
+        console.log('User authenticated:', !!user);
+        console.log('User object:', user);
+        // ---- END DEBUGGING LOG ----
+
+        const { data, error } = await supabase
+        .storage.from('wireframe-to-code')
+        .upload(filePath, file);
+        
             
         if (error) {
-            console.error("Error uploading image:", error);
-            toast.error('Error uploading image');
+            console.error("Error uploading image:", JSON.stringify(error, null, 2));
+            toast.error('Error uploading image: ' + (error.message || 'Unknown error'));
             setLoading(false);
             return;
         }
         
         // Get the public URL
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = await supabase.storage
             .from('wireframe-to-code')
             .getPublicUrl(`public/${fileName}`);
             

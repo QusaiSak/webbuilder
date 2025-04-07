@@ -1,4 +1,5 @@
-import { supabase } from "@/configs/supabase";
+"use server"
+import supabase from "@/configs/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
 
         // Insert the design into the database
         const { error: designError } = await supabase
-            .from('wireframe-to-code')
+            .from('wireframetocode')
             .insert({
                 id: uid,
                 description,

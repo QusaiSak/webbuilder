@@ -8,7 +8,6 @@ export const clerkConfig = {
   redirectUrls: [
     "/",
     "/dashboard",
-    "/sso-callback"
   ],
   
   // Authentication configuration

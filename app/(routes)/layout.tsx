@@ -1,5 +1,7 @@
 import React from 'react'
 import DashboardProvider from './provider';
+import { ClerkProvider } from '@clerk/nextjs'
+import SupabaseAuthSyncer from '@/components/SupabaseAuthSyncer';
 
 
 function DashboardLayout({
@@ -9,9 +11,12 @@ function DashboardLayout({
 }>) {
 
     return (
-        <DashboardProvider>
-            {children}
-        </DashboardProvider>
+        <ClerkProvider>
+            <SupabaseAuthSyncer />
+            <DashboardProvider>
+                {children}
+            </DashboardProvider>
+        </ClerkProvider>
     )
 }
 
