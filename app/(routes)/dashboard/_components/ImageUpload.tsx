@@ -13,10 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
-import { storage } from '@/configs/firebaseConfig'
+import { supabase } from '@/configs/supabase'
 import axios from 'axios'
-import { uuid } from 'drizzle-orm/pg-core'
 import { useAuthContext } from '@/app/provider'
 import { useRouter } from 'next/navigation'
 import Constants from '@/data/Constants'
@@ -47,14 +45,26 @@ function ImageUpload() {
             return;
         }
         setLoading(true);
-        //Save Image to Firebase
+        
+        // Save Image to Supabase Storage
         const fileName = Date.now() + '.png';
-        const imageRef = ref(storage, "Wireframe_To_Code/" + fileName);
-        await uploadBytes(imageRef, file).then(resp => {
-            console.log("Image Uploaded...")
-        });
-
-        const imageUrl = await getDownloadURL(imageRef);
+        const { data, error } = await supabase.storage
+            .from('wireframe-to-code')
+            .upload(`public/${fileName}`, file);
+            
+        if (error) {
+            console.error("Error uploading image:", error);
+            toast.error('Error uploading image');
+            setLoading(false);
+            return;
+        }
+        
+        // Get the public URL
+        const { data: urlData } = supabase.storage
+            .from('wireframe-to-code')
+            .getPublicUrl(`public/${fileName}`);
+            
+        const imageUrl = urlData.publicUrl;
         console.log(imageUrl);
 
         const uid = uuid4();

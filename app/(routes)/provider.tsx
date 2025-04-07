@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect } from 'react'
-import { useAuthContext } from '../provider';
+import { useAuthContext } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import axios from "axios";
@@ -12,25 +12,33 @@ function DashboardProvider({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-
-    const user = useAuthContext();
+    const { user, isSignedIn } = useAuthContext();
     const router = useRouter();
 
     useEffect(() => {
-        if (!user?.user && user.user) return router.replace('/')
-        user?.user && checkUser()
-
-    }, [user])
-
+        if (!isSignedIn) {
+            router.replace('/');
+            return;
+        }
+        
+        if (user) {
+            checkUser();
+        }
+    }, [isSignedIn, user, router]);
 
     const checkUser = async () => {
-        const result = await axios.post('/api/user', {
-            userName: user?.user?.displayName,
-            userEmail: user?.user?.email
-        });
-        console.log(user);
+        if (!user?.email) return;
+        
+        try {
+            const result = await axios.post('/api/user', {
+                userName: user?.firstName || user?.fullName || 'User',
+                userEmail: user?.email
+            });
+            console.log(result.data);
+        } catch (error) {
+            console.error("Error checking user:", error);
+        }
     }
-
 
     return (
         <SidebarProvider>
@@ -41,7 +49,6 @@ function DashboardProvider({
                 <div className='p-10'>{children}</div>
             </main>
         </SidebarProvider>
-
     )
 }
 

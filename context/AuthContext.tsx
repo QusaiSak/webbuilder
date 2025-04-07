@@ -1,5 +1,7 @@
-import { User } from "firebase/auth";
+
+import { User } from "@supabase/supabase-js";
 import { createContext } from "react";
+
 interface AuthContextType {
     user: User | null;
 }
